@@ -1,4 +1,4 @@
--- мо PIPELINE --
+-- NO PIPELINE --
 
 
 library ieee;
