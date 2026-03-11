@@ -1,3 +1,11 @@
+------------------ NOTE ----------------
+--
+--
+--
+-- The tb works with an error flag. 
+-- If the output is not the expected one, the flas is set to 1
+
+
 library ieee;
 use ieee.std_logic_1164.all;
 
