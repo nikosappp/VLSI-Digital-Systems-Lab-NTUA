@@ -8,7 +8,7 @@ entity pipelined_adder is
         B         : in std_logic_vector(3 downto 0);
         pipe_cin  : in std_logic;
         final_sum : out std_logic_vector(3 downto 0);
-        final_out : out std_logic
+        final_cout : out std_logic
     );
 end pipelined_adder;
 
@@ -41,6 +41,13 @@ architecture Mixed of pipelined_adder is
     signal s0_d1, s0_d2, s0_d3 : std_logic; 
     signal s1_d1, s1_d2 : std_logic;
     signal s2_d1 : std_logic;
+    
+    
+    -- the names above follow the format [name][bit]_d[cycles of delay]
+    -- eg: a2_d1 = Bit 2 of input A, delayed by 1 clock cycle.
+    -- s0_d3 : Sum of bit 0, delayed by 3 clock cycles.
+    
+    
 
 begin
 
@@ -81,7 +88,7 @@ begin
             b    => b3_d3, 
             cin  => c3,       
             sum  => s3_temp, 
-            cout => final_out
+            cout => final_cout
         );
 
     process(clk)
