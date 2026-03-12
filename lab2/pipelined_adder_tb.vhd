@@ -40,9 +40,9 @@ architecture behavior of pipelined_adder_tb is
     signal expected_sum_comb : unsigned(4 downto 0);
     -- The expected result. The testbench calculates the correct sum here (A + B + cin_ext)
     -- It is 5 bits wide to hold both the 4-bit sum and the final carry-out
-    signal exp_d1, exp_d2, exp_d3, exp_d4 : unsigned(4 downto 0) := (others => '0'); -- ΠΡΟΣΘΕΤΟΥΜΕ ΤΟ d4
+    signal exp_d1, exp_d2, exp_d3, exp_d4 : unsigned(4 downto 0) := (others => '0'); 
     -- Testbench delay line. Because our pipeline needs 3 intermediate 
-    -- clock cycles to produce the result, we intentionally delay the result by 3 cycles (d1, d2, d3). 
+    -- clock cycles to produce the result, we intentionally delay the result by 3 cycles (d1, d2, d3, d4). 
     -- This allows us to compare the correct data at the correct time
     signal actual_out        : unsigned(4 downto 0);
     -- The total actual output of our circuit
@@ -69,8 +69,17 @@ begin
         clk <= '1';
         wait for CLK_PERIOD / 2;
     end process;
-
-
+    
+    
+    -- Note : The lines below are OUTSIDE of any process.
+    -- In VHDL, this means they act as physical wires and pure combinational logic.
+    -- They do NOT wait for a clock edge. They are continuously active and 
+    -- will update their outputs instantly (in 0 simulation time) the moment 
+    -- any signal on the right side of the assignment (<=) changes its value.
+    
+    -- For example: As soon as the STIMULUS loop changes 'A', 'B', or 'pipe_cin', 
+    -- 'expected_sum_comb' and 'cin_ext' are recalculated immediately.
+    
     -- Convert pipe_cin to a 5-bit unsigned vector for mathematical addition
     cin_ext <= "00001" when pipe_cin = '1' else "00000";
 
@@ -120,8 +129,8 @@ begin
             for j in 0 to 15 loop     -- B values: 0 to 15
                 for k in 0 to 1 loop  -- Cin values: 0 or 1
                     
-                    A <= std_logic_vector(to_unsigned(i, 4));
-                    B <= std_logic_vector(to_unsigned(j, 4));
+                    A <= std_logic_vector(to_unsigned(i, 4));  -- Παίρνει τον ακέραιο i και τον κάνει έναν καθαρό 4-bit αριθμό.
+                    B <= std_logic_vector(to_unsigned(j, 4));  -- Τον μετατρέπει σε std_logic_vactor για να τον συνδέσουμε στο κύκλωμα 
                     
                     if k = 1 then
                         pipe_cin <= '1';
