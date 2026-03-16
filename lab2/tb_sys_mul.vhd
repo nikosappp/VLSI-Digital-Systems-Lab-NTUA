@@ -3,15 +3,15 @@ library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
-entity tb_systolic_multiplier is
-end tb_systolic_multiplier;
+entity tb_sys_mul is
+end tb_sys_mul;
 
-architecture Behavioral of tb_systolic_multiplier is
+architecture tb of tb_sys_mul is
 
     constant CLK_PERIOD : time := 10 ns;
     
     -- component declaration
-    component systolic_multiplier is
+    component sys_mul is
         port (
             clk : in  std_logic;
             A   : in  std_logic_vector(4-1 downto 0);
@@ -26,8 +26,8 @@ architecture Behavioral of tb_systolic_multiplier is
     signal B   : std_logic_vector(4-1 downto 0) := (others => '0');
     signal P   : std_logic_vector(2*4-1 downto 0);
 
-    -- make an array of length 4+1 to delay mathematical result
-    type delay_array is array (0 to 4) of std_logic_vector(2*4-1 downto 0);
+    -- make an array of length 10 to delay mathematical result
+    type delay_array is array (0 to 10) of std_logic_vector(2*4-1 downto 0);
     signal expected_pipe : delay_array := (others => (others => '0'));
 
     -- flags
@@ -38,7 +38,7 @@ architecture Behavioral of tb_systolic_multiplier is
 begin
 
     -- instantiate UUT
-    uut: systolic_multiplier 
+    uut: sys_mul 
     port map (
         clk => clk, 
         A   => A, 
@@ -56,7 +56,7 @@ begin
         wait;
     end process;
 
-    -- calculate A * B mathematically and delay by 4 clock cycles to match UUT
+    -- calculate A * B mathematically and delay by 10 (OR 9) clock cycles to match UUT
     ghost_pipeline_proc: process(clk)
         variable true_result : unsigned(2*4-1 downto 0);
     begin
@@ -68,7 +68,7 @@ begin
             expected_pipe(0) <= std_logic_vector(true_result);
             
             -- shift results down the line
-            for i in 1 to 4 loop
+            for i in 1 to 10 loop
                 expected_pipe(i) <= expected_pipe(i-1);
             end loop;
         end if;
@@ -80,17 +80,17 @@ begin
         variable startup_cycles : integer := 0;
     begin
         if falling_edge(clk) then
-            -- ignore the first 7 clock cycles (flushing 'U's)
-            if startup_cycles < 7 then
+            -- ignore the first 13 clock cycles (flushing 'U's)
+            if startup_cycles < 13 then
                 startup_cycles := startup_cycles + 1;
             else
                 -- pipeline ready, start checking
-                if P /= expected_pipe(4) then       -- error detected
+                if P /= expected_pipe(10) then       -- error detected
                     error_flag  <= '1';
                     error_count <= error_count + 1;
                     
                     report "MISMATCH CAUGHT! " & 
-                           " Expected: " & integer'image(to_integer(unsigned(expected_pipe(4)))) & 
+                           " Expected: " & integer'image(to_integer(unsigned(expected_pipe(10)))) & 
                            " Got: "      & integer'image(to_integer(unsigned(P))) 
                            severity error;
                 else
@@ -134,4 +134,4 @@ begin
         wait;
     end process;
 
-end Behavioral;
+end tb;
