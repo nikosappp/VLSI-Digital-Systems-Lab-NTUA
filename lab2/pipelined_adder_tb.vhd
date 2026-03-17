@@ -46,6 +46,8 @@ architecture behavior of pipelined_adder_tb is
     -- This allows us to compare the correct data at the correct time
     signal actual_out        : unsigned(4 downto 0);
     -- The total actual output of our circuit
+    signal test_done   : std_logic := '0';
+    -- Raised when the test is over
     
     -- Clock period definition
     constant CLK_PERIOD : time := 10 ns;
@@ -64,10 +66,13 @@ begin
     -- Clock Generation Process
     clk_process : process
     begin
-        clk <= '0';
-        wait for CLK_PERIOD / 2;
-        clk <= '1';
-        wait for CLK_PERIOD / 2;
+        while test_done = '0' loop
+            clk <= '0';
+            wait for CLK_PERIOD / 2;
+            clk <= '1';
+            wait for CLK_PERIOD / 2;
+        end loop;
+        wait;
     end process;
     
     
@@ -96,7 +101,7 @@ begin
             exp_d1 <= expected_sum_comb;
             exp_d2 <= exp_d1;
             exp_d3 <= exp_d2;
-            exp_d4 <= exp_d3; -- Η "χαμένη" 4η καθυστέρηση που μας έλειπε!
+            exp_d4 <= exp_d3;
         end if;
     end process;
 
@@ -129,8 +134,8 @@ begin
             for j in 0 to 15 loop     -- B values: 0 to 15
                 for k in 0 to 1 loop  -- Cin values: 0 or 1
                     
-                    A <= std_logic_vector(to_unsigned(i, 4));  -- Παίρνει τον ακέραιο i και τον κάνει έναν καθαρό 4-bit αριθμό.
-                    B <= std_logic_vector(to_unsigned(j, 4));  -- Τον μετατρέπει σε std_logic_vactor για να τον συνδέσουμε στο κύκλωμα 
+                    A <= std_logic_vector(to_unsigned(i, 4)); 
+                    B <= std_logic_vector(to_unsigned(j, 4));
                     
                     if k = 1 then
                         pipe_cin <= '1';
@@ -149,6 +154,7 @@ begin
         wait for 5 * CLK_PERIOD;
 
         -- Stop simulation
+        test_done <= '1';
         wait;
     end process;
 
