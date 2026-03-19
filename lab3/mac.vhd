@@ -31,7 +31,7 @@ begin
         if mac_init = '0' then
           temp_acc <=  temp_acc + ("000" & (ram_out * rom_out));
         else
-          temp_acc <= ("000" & (ram_out * rom_out));
+          temp_acc <= ("000" & (ram_out * rom_out));             -- we put the first product here because if we put '0' it will take 9 cycles to calculate y
         end if;
       end if;
     end process;
