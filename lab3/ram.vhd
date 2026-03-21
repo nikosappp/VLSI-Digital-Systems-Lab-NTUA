@@ -8,7 +8,8 @@ entity ram is
 	 );
     port (clk  : in std_logic;
           we   : in std_logic;						                -- memory write enable
-		      en   : in std_logic;				                        -- operation enable
+		  en   : in std_logic;				                        -- operation enable
+          rst  : in std_logic;                                      -- asynchronous reset
           addr : in std_logic_vector(2 downto 0);			        -- memory address
           di   : in std_logic_vector(data_width-1 downto 0);		-- input data
           do   : out std_logic_vector(data_width-1 downto 0));		-- output data
@@ -22,9 +23,13 @@ architecture Behavioral of ram is
 begin
 
 
-    process (clk)
+    process (clk, rst)
     begin
-        if clk'event and clk = '1' then
+        if rst = '1' then
+            -- reset RAM
+            RAM <= (others => (others => '0'));
+            do <= (others => '0');
+        elsif clk'event and clk = '1' then
             if en = '1' then
                 if we = '1' then				         -- write operation
                     RAM(7) <= RAM(6);
@@ -45,5 +50,3 @@ begin
 
 
 end Behavioral;
-
-
