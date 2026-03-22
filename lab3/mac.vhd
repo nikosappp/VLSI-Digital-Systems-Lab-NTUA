@@ -5,6 +5,7 @@ use ieee.std_logic_unsigned.all;
 entity mac is
   port (
     clk : in std_logic;
+    en : in std_logic;
     mac_init: in std_logic;
     ram_out : in std_logic_vector(8-1 downto 0);
     rom_out : in std_logic_vector(8-1 downto 0);
@@ -28,10 +29,12 @@ begin
 
     begin 
       if rising_edge(clk) then
-        if mac_init = '0' then
-          temp_acc <=  temp_acc + ("000" & (ram_out * rom_out));
-        else
-          temp_acc <= ("000" & (ram_out * rom_out));             -- we put the first product here because if we put '0' it will take 9 cycles to calculate y
+        if en = '1' then
+          if mac_init = '0' then
+            temp_acc <=  temp_acc + ("000" & (ram_out * rom_out));
+          else
+            temp_acc <= ("000" & (ram_out * rom_out));             -- we put the first product here because if we put '0' it will take 9 cycles to calculate y
+          end if;
         end if;
       end if;
     end process;
