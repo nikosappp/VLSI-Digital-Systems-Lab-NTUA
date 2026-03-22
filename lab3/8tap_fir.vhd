@@ -32,15 +32,16 @@ architecture structural of fir_8tap is
     end component;
 
     component mac is
-        port (
-            clk      : in std_logic;
-            en       : in std_logic;
-            mac_init : in std_logic;
-            ram_out  : in std_logic_vector(8-1 downto 0);
-            rom_out  : in std_logic_vector(8-1 downto 0);
-            acc      : out std_logic_vector(19-1 downto 0)
-        );
-    end component;
+    port (
+        clk      : in std_logic;
+        rst      : in std_logic;   
+        en       : in std_logic;
+        mac_init : in std_logic;
+        ram_out  : in std_logic_vector(8-1 downto 0);
+        rom_out  : in std_logic_vector(8-1 downto 0);
+        acc      : out std_logic_vector(19-1 downto 0)
+    );
+end component;
 
     component ram is
         generic (
@@ -92,14 +93,15 @@ begin
     );
 
     mac_inst: mac
-    port map(
-        clk      => clk,
-        mac_init => s_mac_init,
-        ram_out  => s_ram_out,
-        rom_out  => s_rom_out,
-        acc      => y,
-        en       => s_mac_en
-    );
+port map(
+    clk      => clk,
+    rst      => rst,  
+    mac_init => s_mac_init,
+    ram_out  => s_ram_out,
+    rom_out  => s_rom_out,
+    acc      => y,
+    en       => s_mac_en
+);
 
     ram_inst: ram
     generic map(

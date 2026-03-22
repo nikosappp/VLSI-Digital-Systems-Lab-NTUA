@@ -34,8 +34,11 @@ begin
         if (rst = '1') then     
             cnt <= (others => '0');
             has_run <= '0';
+            valid_out <= '0';
             
         elsif rising_edge(clk) then
+
+            valid_out <= '0';
 
             -- This is the point where mac gets the final data.
             -- During the next cycle (cnt=000) it computes the complete sum, so we must tell
@@ -51,6 +54,11 @@ begin
             else
                 cnt <= cnt + 1;
             end if;
+
+            if (cnt = "000" and has_run = '1') then
+                valid_out <= '1';
+            end if;
+
         end if;
     end process;
 
@@ -59,7 +67,7 @@ begin
     rom_address <= cnt;
     ram_address <= cnt;
 
-    -- disable MAC to stop it from accumulating garbage
+     -- disable MAC to stop it from accumulating garbage
     mac_en <= '0' when (cnt = "000" and valid_in = '0') else '1';
 
     -- write new x to RAM during the cycle valid_in is high
@@ -67,8 +75,7 @@ begin
 
     -- initialize MAC and trip valid_out flag during state 001
     mac_init  <= '1' when (cnt = "001") else '0';
-    
-    -- set valid_out during state 001 BUT ONLY IF we have completed the first 8 cycles of operating
-    valid_out <= '1' when (cnt = "001" and has_run = '1') else '0';
+  
+
 
 end behavioral;
