@@ -22,10 +22,8 @@ architecture behavioral of control_unit is
 
     signal cnt : std_logic_vector(3-1 downto 0) := (others => '0'); 
 
-    -- After reset, when the valid_out will be set at cnt=001 the circuit has trash in the acc.
-    -- The output at this point is not valid, we have to wait 8 cylces. When this signal is set
-    -- it means that these 8 cycles have passed.
-    signal has_run : std_logic := '0';
+    -- tracks the final accumulation cycle
+    signal calc_finish : std_logic := '0';
 
 begin
 
@@ -33,18 +31,20 @@ begin
     begin
         if (rst = '1') then     
             cnt <= (others => '0');
-            has_run <= '0';
             valid_out <= '0';
+            calc_finish <= '0';
             
         elsif rising_edge(clk) then
 
-            valid_out <= '0';
+            valid_out <= calc_finish;
 
             -- This is the point where mac gets the final data.
             -- During the next cycle (cnt=000) it computes the complete sum, so we must tell
             -- the circuit that the result is valid this time
             if (cnt = "111") then
-                has_run <= '1';
+                calc_finish <= '1';
+            else
+                calc_finish <= '0';
             end if;
 
             if (cnt = "000") then
@@ -54,11 +54,6 @@ begin
             else
                 cnt <= cnt + 1;
             end if;
-
-            if (cnt = "000" and has_run = '1') then
-                valid_out <= '1';
-            end if;
-
         end if;
     end process;
 
@@ -67,8 +62,11 @@ begin
     rom_address <= cnt;
     ram_address <= cnt;
 
-     -- disable MAC to stop it from accumulating garbage
-    mac_en <= '0' when (cnt = "000" and valid_in = '0') else '1';
+    -- disable MAC to stop it from accumulating garbage
+    -- Force mac_en high during the finishing cycle
+    mac_en <= '1' when calc_finish = '1' else
+              '0' when (cnt = "000" and valid_in = '0') else 
+              '1';
 
     -- write new x to RAM during the cycle valid_in is high
     ram_we <= '1' when (cnt = "000" and valid_in = '1') else '0';
@@ -76,6 +74,4 @@ begin
     -- initialize MAC and trip valid_out flag during state 001
     mac_init  <= '1' when (cnt = "001") else '0';
   
-
-
 end behavioral;
