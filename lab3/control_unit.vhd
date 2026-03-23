@@ -73,6 +73,4 @@ begin
 
     -- initialize MAC and trip valid_out flag during state 001
     mac_init  <= '1' when (cnt = "001") else '0';
-    valid_out <= '1' when (cnt = "001") else '0';
-
 end behavioral;
