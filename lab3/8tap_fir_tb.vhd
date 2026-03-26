@@ -42,9 +42,9 @@ architecture tb of tb_fir_8tap is
     constant h_coeff : h_array := (1, 2, 3, 4, 5, 6, 7, 8);
 
     -- Input sequences
-    type in_sequence is array (0 to 20-1) of integer;
-    constant x_seq1 : in_sequence := (23, 145, 8, 201, 56, 178, 92, 12, 233, 45, 110, 77, 199, 3, 167, 88, 215, 61, 134, 250);
-    constant x_seq2 : in_sequence := (233, 56, 178, 12, 201, 88, 145, 9, 212, 167, 34, 199, 100, 77, 241, 15, 132, 60, 225, 42);
+    type in_sequence is array (0 to 28-1) of integer;
+    constant x_seq1 : in_sequence := (23, 145, 8, 201, 56, 178, 92, 12, 233, 45, 110, 77, 199, 3, 167, 88, 215, 61, 134, 250, 0, 0, 0, 0, 0, 0, 0, 0);
+    constant x_seq2 : in_sequence := (208, 231, 32, 233, 161, 24, 71, 140, 245, 247, 40, 248, 245, 124, 204, 36, 107, 234, 202, 245, 0, 0, 0, 0, 0, 0, 0, 0);
 
     -- Input memory - holds values of x needed for convolution calculation
     type x_array is array (0 to 8-1) of std_logic_vector(8-1 downto 0);
@@ -89,11 +89,11 @@ begin
         wait until falling_edge(clk);
 
         -- First Loop: Normal operation with injected delay
-        for i in 0 to 19 loop
+        for i in 0 to 28-1 loop
             x_stim := conv_std_logic_vector(x_seq1(i), 8);
             
             -- Inject a delay before the last input sequence sample
-            if i = 19 then
+            if i = 27 then
                 report "Injecting an extra 15-cycle delay before sending the last sample..." severity note;
                 wait for CLK_PERIOD * 15; 
             end if;
@@ -122,7 +122,7 @@ begin
         wait until falling_edge(clk);
 
         -- Second Loop: Post-reset operation
-        for i in 0 to 19 loop
+        for i in 0 to 28-1 loop
             x_stim := conv_std_logic_vector(x_seq2(i), 8);
             x        <= x_stim;
             valid_in <= '1';
