@@ -10,7 +10,7 @@ entity sp_converter is
         clk             : in std_logic;
         rst_n           : in std_logic;
         pixel           : in std_logic_vector(8-1 downto 0);
-        valid_in        : in std_logic;
+        enable        : in std_logic;
         -- 3x3 neighborhood outputs
         p11, p12, p13,
         p21, p22, p23,
@@ -56,7 +56,7 @@ begin
             clk   => clk,
             srst  => rst,
             din   => pixel,
-            wr_en => valid_in,
+            wr_en => enable,
             rd_en => rd_en1,
             dout  => fifo1_out
         );
@@ -91,7 +91,7 @@ begin
                 r3c1 <= (others => '0'); r3c2 <= (others => '0'); r3c3 <= (others => '0');
             else
                 -- Track fifo_1 fill level
-                if valid_in = '1' and cnt1 < N then
+                if enable = '1' and cnt1 < N then
                     cnt1 <= cnt1 + 1;
                 end if;
 
@@ -108,7 +108,7 @@ begin
                 end if;
 
                 -- Shift the 3x3 Register Array only when data is flowing
-                if valid_in = '1' or rd_en1 = '1' or rd_en2 = '1' or rd_en3 = '1' then
+                if enable = '1' or rd_en1 = '1' or rd_en2 = '1' or rd_en3 = '1' then
                     r1c3 <= r1c2; r1c2 <= r1c1; r1c1 <= fifo1_out;
                     r2c3 <= r2c2; r2c2 <= r2c1; r2c1 <= fifo2_out;
                     r3c3 <= r3c2; r3c2 <= r3c1; r3c1 <= fifo3_out;
@@ -118,7 +118,7 @@ begin
     end process;
     
     -- Read only when the specific FIFO is full and new data is being pushed in
-    rd_en1 <= '1' when (valid_in = '1' and cnt1 = N) else '0';
+    rd_en1 <= '1' when (enable = '1' and cnt1 = N) else '0';
     rd_en2 <= '1' when (wr_en2 = '1'   and cnt2 = N) else '0';
     rd_en3 <= '1' when (wr_en3 = '1'   and cnt3 = N) else '0';
 
