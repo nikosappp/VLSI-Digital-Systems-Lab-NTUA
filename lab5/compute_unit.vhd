@@ -4,20 +4,20 @@ use ieee.std_logic_unsigned.all;
 
 entity compute_unit is
     port (
-        clk  : in std_logic;
+        clk             : in std_logic;
         -- neighborhood control signal
-        ctrl : in std_logic_vector(2-1 downto 0);
+        ctrl            : in std_logic_vector(2-1 downto 0);
         -- edge case control signals
-        top_edge    : in std_logic;
-        bottom_edge : in std_logic;
-        left_edge   : in std_logic;
-        right_edge  : in std_logic;
+        top_edge        : in std_logic;
+        bottom_edge     : in std_logic;
+        left_edge       : in std_logic;
+        right_edge      : in std_logic;
         -- 3x3 pixel neighborhood
         p11, p12, p13,
         p21, p22, p23,
         p31, p32, p33   : in std_logic_vector(8-1 downto 0);
         -- RGB pixel outputs
-        R, G, B : out std_logic_vector(8-1 downto 0)
+        R, G, B         : out std_logic_vector(8-1 downto 0)
     );
 end compute_unit;
 

@@ -18,7 +18,7 @@ entity sp_converter is
     );
 end sp_converter;
 
-architecture sp_converter_arch of sp_converter is
+architecture behavioral of sp_converter is
     -- Declare Xilinx FIFO IP Component
     component fifo_generator_0
         port (
@@ -38,7 +38,7 @@ architecture sp_converter_arch of sp_converter is
     -- FIFO Write Enables
     signal wr_en2, wr_en3 : std_logic := '0';
     -- Fill Counters (track when N pixels have been buffered)
-    signal cnt1, cnt2, cnt3 : integer range 0 to N := 0;
+    signal cnt1, cnt2, cnt3 : integer range 0 to N-1 := 0;
     -- Inverted reset for the FIFO IP
     signal rst : std_logic;
 
@@ -91,19 +91,19 @@ begin
                 r3c1 <= (others => '0'); r3c2 <= (others => '0'); r3c3 <= (others => '0');
             else
                 -- Track fifo_1 fill level
-                if enable = '1' and cnt1 < N then
+                if enable = '1' and cnt1 < N-1 then
                     cnt1 <= cnt1 + 1;
                 end if;
 
                 -- Pass data to fifo_2 and track its fill level
                 wr_en2 <= rd_en1;
-                if wr_en2 = '1' and cnt2 < N then
+                if wr_en2 = '1' and cnt2 < N-1 then
                     cnt2 <= cnt2 + 1;
                 end if;
 
                 -- Pass data to fifo_3 and track its fill level
                 wr_en3 <= rd_en2;
-                if wr_en3 = '1' and cnt3 < N then
+                if wr_en3 = '1' and cnt3 < N-1 then
                     cnt3 <= cnt3 + 1;
                 end if;
 
@@ -118,13 +118,13 @@ begin
     end process;
     
     -- Read only when the specific FIFO is full and new data is being pushed in
-    rd_en1 <= '1' when (enable = '1' and cnt1 = N) else '0';
-    rd_en2 <= '1' when (wr_en2 = '1'   and cnt2 = N) else '0';
-    rd_en3 <= '1' when (wr_en3 = '1'   and cnt3 = N) else '0';
+    rd_en1 <= '1' when (enable = '1' and cnt1 = N-1) else '0';
+    rd_en2 <= '1' when (wr_en2 = '1' and cnt2 = N-1) else '0';
+    rd_en3 <= '1' when (wr_en3 = '1' and cnt3 = N-1) else '0';
 
     -- Map registers to outputs
     p11 <= r3c3; p12 <= r3c2; p13 <= r3c1;
     p21 <= r2c3; p22 <= r2c2; p23 <= r2c1;
     p31 <= r1c3; p32 <= r1c2; p33 <= r1c1;
 
-end sp_converter_arch;
+end behavioral;
