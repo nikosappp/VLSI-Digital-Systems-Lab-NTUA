@@ -5,7 +5,7 @@ use ieee.std_logic_unsigned.all;
 entity compute_unit is
     port (
         clk             : in std_logic;
-        -- neighborhood control signal
+        -- neighborhood control signal (keeps the case of the bayer filter)
         ctrl            : in std_logic_vector(2-1 downto 0);
         -- edge case control signals
         top_edge        : in std_logic;
@@ -54,6 +54,9 @@ begin
             end if;
 
             -- Calculate RGB values according to the current neighborhood
+            -- Note: Division is performed using bit slicing (right shift).
+            --       sum(8 downto 1) = sum / 2 (right shift by 1 bit)
+            --       sum(9 downto 2) = sum / 4 (right shift by 2 bits)
             case ctrl is
                 when "00" =>    -- Case (i)
                     sum := ("00" & m21) + ("00" & m23);

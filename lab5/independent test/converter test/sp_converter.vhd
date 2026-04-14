@@ -36,7 +36,7 @@ architecture behavioral of sp_converter is
     -- FIFO Read Enables
     signal rd_en1, rd_en2, rd_en3 : std_logic := '0';
     -- FIFO Write Enables
-    signal wr_en2, wr_en3 : std_logic := '0';  -- wr_en1 is the "enable"
+    signal wr_en2, wr_en3 : std_logic := '0';
     -- Fill Counters (track when N pixels have been buffered)
     signal cnt1, cnt2, cnt3 : integer range 0 to N-1 := 0;
     -- Inverted reset for the FIFO IP
