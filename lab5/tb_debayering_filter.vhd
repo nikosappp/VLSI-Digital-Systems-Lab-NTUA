@@ -14,9 +14,9 @@ end tb_debayering_filter;
 architecture tb of tb_debayering_filter is
     -- Component Declaration for the Unit Under Test (UUT)
     component debayering_filter
-        generic (
-            N : integer
-        );
+        -- generic (
+        --     N : integer
+        -- );
         port (
             clk            : in  std_logic;
             rst_n          : in  std_logic;
@@ -52,7 +52,7 @@ begin
 
     -- Instantiate the Unit Under Test
     UUT: debayering_filter
-        generic map ( N => N )
+        -- generic map ( N => N )
         port map (
             clk            => clk,
             rst_n          => rst_n,
