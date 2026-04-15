@@ -63,7 +63,7 @@ begin
                 delay_cnt      <= 0;
                 col_cnt        <= 0;
                 row_cnt        <= 0;
-                pixels_in      <= 0;
+                pixels_in      <= 1;
                 valid_out      <= '0';
                 image_finished <= '0';
 
@@ -87,7 +87,7 @@ begin
                         -- Loading State: wait until the first pixel is ready for processing
                         when LOADING =>
                             -- Loading done, start processing the image
-                            if delay_cnt = (2*N+4) then
+                            if delay_cnt = (2*N+1) then
                                 state     <= RUNNING;
                                 valid_out <= '1';
                                 col_cnt   <= 1; 
