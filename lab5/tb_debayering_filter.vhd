@@ -30,7 +30,7 @@ architecture tb of tb_debayering_filter is
     end component;
 
     -- Generic configuration
-    constant N : integer := 1024; -- Set this to match your test image width
+    constant N : integer := 32; -- Set this to match your test image width
     constant CLK_PERIOD : time := 10 ns;
 
     -- UUT Signals
@@ -81,9 +81,13 @@ begin
 
     -- Stimulus Process: Reads input.txt and drives UUT
     stim_proc : process
-        file in_file     : text open read_mode is "input_image.txt";
+        file in_file     : text open read_mode is "C:\VLSI\lab5-6\input_image.txt";
         variable in_line : line;
         variable pix_val : std_logic_vector(8-1 downto 0);
+        
+        -- Counter and flag to trigger a SINGLE pipeline stall
+        variable stall_cnt   : integer := 0; 
+        variable has_stalled : boolean := false;
     begin
         -- Initial State
         valid_in <= '0';
@@ -113,10 +117,33 @@ begin
             
             -- Wait for next clock edge
             wait for CLK_PERIOD;
+
+            -- =====================================================
+            -- Intermittent Stall Logic (Happens exactly once at halfway)
+            -- =====================================================
+            stall_cnt := stall_cnt + 1;
+            
+            -- Drop valid_in ONCE after exactly half the pixels are sent
+            if stall_cnt = (N * N) / 2 and not has_stalled then 
+                valid_in <= '0';
+                
+                -- Put dummy data on the pixel bus to ensure the circuit 
+                -- isn't accidentally reading while valid_in is low
+                pixel <= x"FF"; 
+                
+                -- Pause the stream for 4 clock cycles
+                wait for CLK_PERIOD * 4; 
+                
+                -- Lock the flag so it never stalls again
+                has_stalled := true;
+            end if;
+            -- =====================================================
+
         end loop;
 
         -- End of file reached, stop feeding valid data
         valid_in <= '0';
+        pixel    <= (others => '0');
         
         -- Wait for the pipeline to flush naturally
         wait until image_finished = '1';
@@ -131,13 +158,17 @@ begin
     -- Checker Process: Reads expected.txt and compares outputs
     -- =========================================================
     check_proc : process
-        file exp_file    : text open read_mode is "expected_output.txt";
+        file exp_file    : text open read_mode is "C:\VLSI\lab5-6\expected_output.txt";
         variable exp_line: line;
         variable exp_R   : std_logic_vector(7 downto 0);
         variable exp_G   : std_logic_vector(7 downto 0);
         variable exp_B   : std_logic_vector(7 downto 0);
-        variable space1  : character; -- Used to consume the space between binary strings
+        variable space1  : character; 
         variable space2  : character;
+        
+        -- NEW: Variables for detailed error printing
+        variable pixel_out_cnt : integer := 0;
+        variable out_line      : line;
     begin
         -- Wait until reset is released before checking
         wait until rst_n = '1';
@@ -147,9 +178,11 @@ begin
             wait until rising_edge(clk);
             
             if valid_out = '1' then
+                pixel_out_cnt := pixel_out_cnt + 1; -- Track the pixel index
+                
                 readline(exp_file, exp_line);
                 
-                -- Read the three expected RGB values (assuming space-separated binary)
+                -- Read the three expected RGB values
                 read(exp_line, exp_R);
                 read(exp_line, space1);
                 read(exp_line, exp_G);
@@ -160,7 +193,35 @@ begin
                 if (R /= exp_R) or (G /= exp_G) or (B /= exp_B) then
                     error_flag <= '1';
                     error_counter <= error_counter + 1;
-                    report "Mismatch detected at output pixel!" severity warning;
+                    
+                    -- Formatted Error Print to the Console
+                    write(out_line, string'("--------------------------------------------------"));
+                    writeline(output, out_line);
+                    
+                    write(out_line, string'("MISMATCH at Pixel #"));
+                    write(out_line, pixel_out_cnt);
+                    write(out_line, string'(" | Simulation Time: "));
+                    write(out_line, now);
+                    writeline(output, out_line);
+                    
+                    write(out_line, string'("  EXPECTED   -> R: "));
+                    write(out_line, exp_R);
+                    write(out_line, string'(", G: "));
+                    write(out_line, exp_G);
+                    write(out_line, string'(", B: "));
+                    write(out_line, exp_B);
+                    writeline(output, out_line);
+                    
+                    write(out_line, string'("  CALCULATED -> R: "));
+                    write(out_line, R);
+                    write(out_line, string'(", G: "));
+                    write(out_line, G);
+                    write(out_line, string'(", B: "));
+                    write(out_line, B);
+                    writeline(output, out_line);
+                    
+                    write(out_line, string'("--------------------------------------------------"));
+                    writeline(output, out_line);
                 else
                     error_flag <= '0';
                 end if;
@@ -171,6 +232,16 @@ begin
                 exit;
             end if;
         end loop;
+        
+        -- Print Final Summary at the end of the simulation
+        wait for CLK_PERIOD;
+        write(out_line, string'("=================================================="));
+        writeline(output, out_line);
+        write(out_line, string'("SIMULATION FINISHED. Total Mismatches: "));
+        write(out_line, error_counter);
+        writeline(output, out_line);
+        write(out_line, string'("=================================================="));
+        writeline(output, out_line);
         
         wait;
     end process;

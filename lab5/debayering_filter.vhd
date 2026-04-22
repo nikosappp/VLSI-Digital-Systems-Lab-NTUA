@@ -4,7 +4,7 @@ use ieee.std_logic_unsigned.all;
 
 entity debayering_filter is
     generic (
-        N : integer := 1024
+        N : integer := 32
     );
     port (
         clk            : in std_logic;
