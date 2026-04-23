@@ -93,7 +93,7 @@ architecture arch of dvlsi_lab6_top is
 
   component debayering_filter is
     generic (
-        N : integer := 1024
+        N : integer := 32
     );
     port (
         clk            : in  std_logic;
@@ -190,7 +190,7 @@ begin
 
               DEBAYERING_FILTER_INSTANCE : debayering_filter
               generic map (
-                  N => 1024 
+                  N => 32
               )
               port map (
                   clk            => aclk,
