@@ -1,0 +1,1 @@
+The assignment instructions for Lab 5 refer exclusively to **Part A**
