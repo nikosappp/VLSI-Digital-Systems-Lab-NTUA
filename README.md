@@ -29,3 +29,6 @@ RTL implementation of a Debayering (demosaicing) filter utilizing bilinear inter
 
 ### Lab 6: SoC Integration and AXI-Stream Board Verification
 Deployment of the Lab 5 Debayering logic onto the Zynq SoC using the AXI-Stream protocol for high-throughput image data transfer. The system reuses the simulated hardware accelerator and is verified on-board via Vitis, demonstrating a complete hardware-accelerated image processing pipeline.
+
+### Lab 7: Runtime Reconfigurable Debayering Filter with AXI Integration
+Extension of the debayering architecture into a runtime reconfigurable system, capable of dynamic image resolution scaling (64x64 to 1024x1024) without FPGA bitstream reprogramming. The project utilizes a hybrid AXI architecture, integrating AXI-Lite for real-time parameter configuration (image dimensions) and AXI-Stream for high-throughput data transfers. 
